@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "name": "Browser Notes",
+    "description": "This is a serverless chrome extension built with React and Tailwind",
+    "action": {
+        "default_popup": "js/index.html",
+        "default_title": "Browser Notes"
+    }
+}

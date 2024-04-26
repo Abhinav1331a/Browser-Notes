@@ -1,0 +1,434 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  ApiName:
+    Type: String
+    Description: Term_Project_API_Gateway
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: backupbucket-csci5409-b00929073
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+  UserDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: UserData
+      AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: email
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  ExportNotebookSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: ExportNotebookSNSTopic
+      TopicName: ExportNotebookSNSTopic
+  addNotebookLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: addNotebookLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: addNotebookLambda.zip
+  deleteNotebooksLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: deleteNotebooksLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: deleteNotebooksLambda.zip
+  getNotebooksLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: getNotebooksLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: getNotebooksLambda.zip
+  getNotebookLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: getNotebookLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: getNotebookLambda.zip
+  saveNotebookLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: saveNotebookLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: saveNotebookLambda.zip
+  userAuthLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: userAuthLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: userAuthLambda.zip
+  userRegLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: userRegLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: userRegLambda.zip
+  subscribeLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: subscribeLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Environment:
+        Variables:
+          USER_SUBSCRIBE_TOPIC_ARN: !Ref ExportNotebookSNSTopic
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: subscribeLambda.zip
+  exportNotebookLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: exportNotebookLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Environment:
+        Variables:
+          USER_SUBSCRIBE_TOPIC_ARN: !Ref ExportNotebookSNSTopic
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: exportNotebookLambda.zip
+  eventBridgeDataExportLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: eventBridgeDataExportLambda
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::767397693194:role/LabRole
+      Runtime: python3.10
+      Timeout: 60
+      Code:
+        S3Bucket: codebucket-csci5409-b00929073
+        S3Key: eventBridgeDataExportLambda.zip
+  ProjectApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Ref ApiName
+  OptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: OPTIONS
+      ResourceId: !GetAtt ProjectApi.RootResourceId
+      RestApiId: !Ref ProjectApi
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,PUT,DELETE'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            ResponseTemplates:
+              application/json: ''
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  StateMachineResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ProjectApi
+      ParentId: !GetAtt ProjectApi.RootResourceId
+      PathPart: state-machine
+  StateMachineIntegration:
+    Type: AWS::ApiGateway::Method
+    DependsOn: ProjectApi
+    Properties:
+      RestApiId: !Ref ProjectApi
+      ResourceId: !Ref StateMachineResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:states:action/StartSyncExecution
+        Credentials: arn:aws:iam::767397693194:role/LabRole
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,PUT,DELETE'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            ResponseTemplates:
+              application/json: ''
+          - StatusCode: 400
+            SelectionPattern: 4\d{2}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,PUT,DELETE'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            ResponseTemplates:
+              application/json: ''
+          - StatusCode: 500
+            SelectionPattern: 5\d{2}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,PUT,DELETE'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            ResponseTemplates:
+              application/json: ''
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+        - StatusCode: 400
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+        - StatusCode: 500
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  Deployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: StateMachineIntegration
+    Properties:
+      RestApiId: !Ref ProjectApi
+      StageName: Production
+      Description: Production deployment
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: !Ref Deployment
+      RestApiId: !Ref ProjectApi
+      DeploymentId: !Ref Deployment
+      Description: Your stage description
+  MyStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    DependsOn:
+      - userRegLambda
+      - userAuthLambda
+      - addNotebookLambda
+      - getNotebooksLambda
+      - deleteNotebooksLambda
+      - getNotebookLambda
+      - saveNotebookLambda
+      - subscribeLambda
+      - exportNotebookLambda
+    Properties:
+      RoleArn: arn:aws:iam::767397693194:role/LabRole
+      StateMachineType: EXPRESS
+      Definition:
+        Comment: A description of my state machine
+        StartAt: Choice
+        States:
+          Choice:
+            Type: Choice
+            Choices:
+              - Variable: $.action
+                StringEquals: register
+                Next: RegisterLambda
+              - Variable: $.action
+                StringEquals: login
+                Next: LoginLambda
+              - Variable: $.action
+                StringEquals: add-notebook
+                Next: AddNotebookLambda
+              - Variable: $.action
+                StringEquals: get-notebooks
+                Next: GetNotebooksLambda
+              - Variable: $.action
+                StringEquals: delete-notebook
+                Next: DeleteNotebookLambda
+              - Variable: $.action
+                StringEquals: get-notebook
+                Next: GetNotebookLambda
+              - Variable: $.action
+                StringEquals: save-notebook
+                Next: SaveNotebookLambda
+              - Variable: $.action
+                StringEquals: subscribe
+                Next: SubscribeLambda
+              - Variable: $.action
+                StringEquals: export-notebook
+                Next: ExportNotebookLambda
+          RegisterLambda:
+            Type: Task
+            Resource: !GetAtt userRegLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          LoginLambda:
+            Type: Task
+            Resource: !GetAtt userAuthLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          AddNotebookLambda:
+            Type: Task
+            Resource: !GetAtt addNotebookLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          GetNotebooksLambda:
+            Type: Task
+            Resource: !GetAtt getNotebooksLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          DeleteNotebookLambda:
+            Type: Task
+            Resource: !GetAtt deleteNotebooksLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          GetNotebookLambda:
+            Type: Task
+            Resource: !GetAtt getNotebookLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          SaveNotebookLambda:
+            Type: Task
+            Resource: !GetAtt saveNotebookLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          SubscribeLambda:
+            Type: Task
+            Resource: !GetAtt subscribeLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+          ExportNotebookLambda:
+            Type: Task
+            Resource: !GetAtt exportNotebookLambda.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                  - Lambda.SdkClientException
+                  - Lambda.TooManyRequestsException
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2
+            End: true
+  FiveMinutesTriggerEventBridgeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: five-minutes-timer
+      Description: Trigger Lambda once every 5 minutes
+      ScheduleExpression: rate(5 minutes)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt eventBridgeDataExportLambda.Arn
+          Id: first
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt eventBridgeDataExportLambda.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt FiveMinutesTriggerEventBridgeRule.Arn

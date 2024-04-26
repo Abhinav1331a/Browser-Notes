@@ -1,0 +1,190 @@
+Comment: A description of my state machine
+StartAt: Choice
+States:
+  Choice:
+    Type: Choice
+    Choices:
+      - Variable: $.action
+        StringMatches: register
+        Next: Register Lambda
+      - Variable: $.action
+        StringMatches: login
+        Next: Login Lambda
+      - Variable: $.action
+        StringMatches: add-notebook
+        Next: Add Notebook Lambda
+      - Variable: $.action
+        StringMatches: get-notebooks
+        Next: Get Notebooks Lambda
+      - Variable: $.action
+        StringMatches: delete-notebook
+        Next: Delete Notebook Lambda
+      - Variable: $.action
+        StringMatches: get-notebook
+        Next: Get Notebook Lambda
+      - Variable: $.action
+        StringMatches: save-notebook
+        Next: Save Notebook Lambda
+      - Variable: $.action
+        StringMatches: subscribe
+        Next: Subscribe Lambda
+      - Variable: $.action
+        StringMatches: export-notebook
+        Next: Export Notebook Lambda
+  Register Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: arn:aws:lambda:us-east-1:767397693194:function:registerLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Login Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: arn:aws:lambda:us-east-1:767397693194:function:loginLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Add Notebook Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: arn:aws:lambda:us-east-1:767397693194:function:addNotebookLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Get Notebooks Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: >-
+        arn:aws:lambda:us-east-1:767397693194:function:getNotebooksLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Delete Notebook Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: >-
+        arn:aws:lambda:us-east-1:767397693194:function:deleteNotebookLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Get Notebook Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: arn:aws:lambda:us-east-1:767397693194:function:getNotebookLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Save Notebook Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: >-
+        arn:aws:lambda:us-east-1:767397693194:function:saveNotebookLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Subscribe Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: arn:aws:lambda:us-east-1:767397693194:function:SubscribeLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
+  Export Notebook Lambda:
+    Type: Task
+    Resource: arn:aws:states:::lambda:invoke
+    OutputPath: $.Payload
+    Parameters:
+      Payload.$: $
+      FunctionName: >-
+        arn:aws:lambda:us-east-1:767397693194:function:exportNotebookLambda:$LATEST
+    Retry:
+      - ErrorEquals:
+          - Lambda.ServiceException
+          - Lambda.AWSLambdaException
+          - Lambda.SdkClientException
+          - Lambda.TooManyRequestsException
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2
+    End: true
